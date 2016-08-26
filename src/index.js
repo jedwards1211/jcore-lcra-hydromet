@@ -1,23 +1,28 @@
 import getHtml from './getHtml'
 import parseStage from './parseStage'
+import channelDataUrl from './channelDataUrl'
+import parseStageChannelData from './parseStageChannelData'
+import niceCeiling from './niceCeiling'
 import {promisify} from 'bluebird'
 import {connect} from 'jcore-api'
-import camelCase from 'lodash.camelCase'
+import camelCase from 'lodash.camelcase'
 import memoize from 'lodash.memoize'
 
-require('dotenv').config()
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 
 const {API_TOKEN} = process.env
 if (!API_TOKEN) {
   console.error("You must set the API_TOKEN environment variable")
-  return 1
+  process.exit(1)
 }
 
-const STAGE_URL = process.env.STAGE_URL || 'http://hydromet.lcra.org/repstage.asp'
+const BASE_URL = process.env.BASE_URL || 'http://hydromet.lcra.org/'
+const STAGE_URL = process.env.STAGE_URL || BASE_URL + 'repstage.asp'
 
 const getChannelId = memoize(location => `lcraHydromet^${camelCase(location)}`)
 const _metadata = {}
-const realTimeData = {}
 
 connect(API_TOKEN, async (err, jcore) => {
   if (err) {
@@ -39,24 +44,35 @@ connect(API_TOKEN, async (err, jcore) => {
     try {
       const data = parseStage(await getHtml(STAGE_URL))
       const metadata = {}
-      data.forEach(({location, date, stage, flow}) => {
+      const realTimeData = {}
+      for (let i = 0; i < data.length; i++) {
+        const {location, date, stage, flow, dataWinArgs} = data[i]
         const channelId = getChannelId(location)
+        const stageChannel = channelId + '^stage'
+        const flowChannel = channelId + '^flow'
         const item = _metadata[channelId]
         if (!item) {
-          _metadata[channelId] = metadata[channelId] = { name: [location] }
-          metadata[`${channelId}^stage`] = { name: ['Stage'], timeout: 9 * 60000, units: 'ft' }
-          metadata[`${channelId}^flow`] = { name: ['Flow'] , timeout: 9 * 60000, units: 'cfs' }
+          _metadata[channelId] = metadata[channelId] = {name: [location]}
+          metadata[stageChannel] = {name: ['Stage'], timeout: 9 * 60000, units: 'ft', min: 0, max: 200}
+          metadata[flowChannel] = {name: ['Flow'], timeout: 9 * 60000, units: 'cfs', min: 0, max: 200}
+
+          if (dataWinArgs) {
+            const stageChannelData = parseStageChannelData(await getHtml(BASE_URL + channelDataUrl(...dataWinArgs)))
+            metadata[stageChannel].max = niceCeiling(Math.max(stageChannelData.maxStage, stageChannelData.floodStage || 0) * 3 / 2)
+            if (stageChannelData.maxFlow) metadata[flowChannel].max = niceCeiling(stageChannelData.maxFlow * 3 / 2)
+          }
         }
         const t = date.getTime()
-        realTimeData[`${channelId}^stage`] = {t, v: stage}
-        realTimeData[`${channelId}^flow`] = {t, v: flow}
-      })
+        realTimeData[stageChannel] = {t, v: stage}
+        realTimeData[flowChannel] = {t, v: flow}
+      }
       const metadataCount = Object.keys(metadata).length
       if (metadataCount) {
         await setMetadata(metadata)
         console.log(`Set metadata for ${metadataCount} channels`)
       }
       await setRealTimeData(realTimeData)
+      console.log(realTimeData)
     } catch (error) {
       console.error(error.stack)
     }
