@@ -7,7 +7,13 @@ import memoize from 'lodash.memoize'
 
 require('dotenv').config()
 
-const {API_TOKEN, STAGE_URL} = process.env
+const {API_TOKEN} = process.env
+if (!API_TOKEN) {
+  console.error("You must set the API_TOKEN environment variable")
+  return 1
+}
+
+const STAGE_URL = process.env.STAGE_URL || 'http://hydromet.lcra.org/repstage.asp'
 
 const getChannelId = memoize(location => `lcraHydromet^${camelCase(location)}`)
 const _metadata = {}
