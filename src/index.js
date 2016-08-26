@@ -33,12 +33,12 @@ if (!API_TOKEN) {
 const BASE_URL = process.env.BASE_URL || 'http://hydromet.lcra.org/'
 const STAGE_URL = process.env.STAGE_URL || BASE_URL + 'repstage.asp'
 
-const getChannelId = memoize(location => `lcraHydromet^${camelCase(location)}`)
+const getChannelId = memoize(location => `lcraHydromet.${camelCase(location)}`)
 
 connect(API_TOKEN, async (err, jcore) => {
   if (err) {
     console.error(err.stack)
-    return 1
+    process.exit(1)
   }
 
   const setMetadata = promisify(jcore.setMetadata, {context: jcore})
@@ -61,9 +61,9 @@ connect(API_TOKEN, async (err, jcore) => {
       const existingMetadata = await getMetadata({channelIds})
       await Promise.all(data.map(async ({location, date, stage, flow, dataWinArgs}) => {
         const channelId = getChannelId(location)
-        const stageChannel = channelId + '^stage'
-        const flowChannel = channelId + '^flow'
-        if (!existingMetadata || (!existingMetadata[channelId] && !existingMetadata[channelId.replace(/\^/g, '.')])) {
+        const stageChannel = channelId + '.stage'
+        const flowChannel = channelId + '.flow'
+        if (!existingMetadata || (!existingMetadata[channelId])) {
           metadata[channelId] = {name: [location]}
           metadata[stageChannel] = {name: ['Stage'], timeout: 9 * 60000, units: 'ft', min: 0, max: 200}
           metadata[flowChannel] = {name: ['Flow'], timeout: 9 * 60000, units: 'cfs', min: 0, max: 200}
