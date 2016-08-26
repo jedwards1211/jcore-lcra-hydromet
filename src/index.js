@@ -1,12 +1,24 @@
+import superagent from 'superagent-use'
 import getHtml from './getHtml'
 import parseStage from './parseStage'
 import channelDataUrl from './channelDataUrl'
 import parseStageChannelData from './parseStageChannelData'
 import niceCeiling from './niceCeiling'
-import {promisify} from 'bluebird'
+import Promise, {promisify} from 'bluebird'
 import {connect} from 'jcore-api'
 import camelCase from 'lodash.camelcase'
 import memoize from 'lodash.memoize'
+
+import Throttle from 'superagent-throttle'
+
+const throttle = new Throttle({
+  active: true,
+  rate: 1,
+  ratePer: 1000,
+  concurrent: 1
+})
+
+superagent.use(throttle.plugin())
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
@@ -22,7 +34,6 @@ const BASE_URL = process.env.BASE_URL || 'http://hydromet.lcra.org/'
 const STAGE_URL = process.env.STAGE_URL || BASE_URL + 'repstage.asp'
 
 const getChannelId = memoize(location => `lcraHydromet^${camelCase(location)}`)
-const _metadata = {}
 
 connect(API_TOKEN, async (err, jcore) => {
   if (err) {
@@ -31,6 +42,7 @@ connect(API_TOKEN, async (err, jcore) => {
   }
 
   const setMetadata = promisify(jcore.setMetadata, {context: jcore})
+  const getMetadata = promisify(jcore.getMetadata, {context: jcore})
   const setRealTimeData = promisify(jcore.setRealTimeData, {context: jcore})
 
   try {
@@ -45,14 +57,14 @@ connect(API_TOKEN, async (err, jcore) => {
       const data = parseStage(await getHtml(STAGE_URL))
       const metadata = {}
       const realTimeData = {}
-      for (let i = 0; i < data.length; i++) {
-        const {location, date, stage, flow, dataWinArgs} = data[i]
+      const channelIds = data.map(({location}) => getChannelId(location))
+      const existingMetadata = await getMetadata({channelIds})
+      await Promise.all(data.map(async ({location, date, stage, flow, dataWinArgs}) => {
         const channelId = getChannelId(location)
         const stageChannel = channelId + '^stage'
         const flowChannel = channelId + '^flow'
-        const item = _metadata[channelId]
-        if (!item) {
-          _metadata[channelId] = metadata[channelId] = {name: [location]}
+        if (!existingMetadata || (!existingMetadata[channelId] && !existingMetadata[channelId.replace(/\^/g, '.')])) {
+          metadata[channelId] = {name: [location]}
           metadata[stageChannel] = {name: ['Stage'], timeout: 9 * 60000, units: 'ft', min: 0, max: 200}
           metadata[flowChannel] = {name: ['Flow'], timeout: 9 * 60000, units: 'cfs', min: 0, max: 200}
 
@@ -65,7 +77,7 @@ connect(API_TOKEN, async (err, jcore) => {
         const t = date.getTime()
         realTimeData[stageChannel] = {t, v: stage}
         realTimeData[flowChannel] = {t, v: flow}
-      }
+      }))
       const metadataCount = Object.keys(metadata).length
       if (metadataCount) {
         await setMetadata(metadata)
