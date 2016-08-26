@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+REGISTRY="registry.jcore.io:5000"
+
+set -x
+set -e
+
+COMMIT="jcore/lcra-hydromet:$(git rev-parse HEAD)"
+VERSION="jcore/lcra-hydromet:$(node -e 'console.log(require("./package").version)')"
+
+docker push ${REGISTRY}/${COMMIT}
+docker push ${REGISTRY}/${VERSION}

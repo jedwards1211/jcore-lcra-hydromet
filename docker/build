@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+set -e
+set -x
+
+REF=$(git rev-parse HEAD)
+VERSION=$(node -e "console.log(require('./package').version)")
+
+if  [ ! -e node_modules ] \
+    || [ package.json -nt node_modules ] \
+    || [ npm-shrinkwrap.json -nt node_modules ]
+then
+    npm install
+fi
+
+npm run build
+
+docker build \
+    -t "registry.jcore.io:5000/jcore/lcra-hydromet:$REF" \
+    -t "registry.jcore.io:5000/jcore/lcra-hydromet:$VERSION" .

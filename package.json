@@ -1,0 +1,36 @@
+{
+  "name": "jcore-lcra-hydromet",
+  "version": "1.0.0",
+  "description": "jcore plugin to pipe in data from LCRA Hydromet",
+  "main": "index.js",
+  "scripts": {
+    "repl": "babel-node",
+    "start": "babel-node src/index.js",
+    "build": "babel src/ --out-dir lib",
+    "prod": "node lib/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "babel-runtime": "^6.11.6",
+    "bluebird": "^3.4.3",
+    "domhandler": "^2.3.0",
+    "domutils": "^1.5.1",
+    "dotenv": "^2.0.0",
+    "htmlparser2": "^3.9.1",
+    "lodash.camelcase": "^4.3.0",
+    "lodash.memoize": "^4.1.2",
+    "moment": "^2.14.1",
+    "superagent": "^2.2.0",
+    "superagent-promise-plugin": "^3.2.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.14.0",
+    "babel-core": "^6.14.0",
+    "babel-plugin-transform-runtime": "^6.12.0",
+    "babel-preset-es2015-node5": "^1.2.0",
+    "babel-preset-stage-1": "^6.13.0",
+    "flow-bin": "^0.31.1",
+    "jcore-api": "^1.1.1"
+  }
+}
