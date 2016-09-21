@@ -21,9 +21,11 @@
     "lodash.camelcase": "^4.3.0",
     "lodash.memoize": "^4.1.2",
     "moment": "^2.14.1",
+    "phantomjs-prebuilt": "^2.1.12",
     "superagent": "^2.2.0",
     "superagent-throttle": "^0.1.1",
-    "superagent-use": "0.0.1"
+    "superagent-use": "0.0.1",
+    "webdriverio": "^4.2.16"
   },
   "devDependencies": {
     "babel-cli": "^6.14.0",
