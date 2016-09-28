@@ -7,7 +7,7 @@ function wtemp(value) {
 
 function parseNumber(value) {
   const number = parseFloat(value)
-  return number <= -998 ? null : number
+  return number <= -998 ? NaN : number
 }
 
 export default function parseMapData(dom) {

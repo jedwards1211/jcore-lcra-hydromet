@@ -1,8 +1,10 @@
 import request from 'superagent'
 import htmlparser from 'htmlparser2'
 import charset from 'superagent-charset'
+import mapDataUrl from './mapDataUrl'
 
 async function getMapData(req) {
+  if (!req) req = mapDataUrl()
   console.log(`GET ${req}`)
   if (typeof req === 'string') req = charset(request).get(req).charset('ucs2')
   return new Promise((resolve, reject) => {
