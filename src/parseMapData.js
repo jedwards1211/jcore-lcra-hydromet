@@ -1,48 +1,47 @@
 import {find, findOne, getChildren} from 'domutils'
+import {omitBy} from 'lodash'
 
 function wtemp(value) {
   if (value === -998) return null
   return Math.round(value = value * 1.8 + 32)
 }
 
-function parseNumber(value) {
-  const number = parseFloat(value)
-  return number <= -998 ? NaN : number
-}
-
 export default function parseMapData(dom) {
-  return findOne(e => e.name === 'rows', dom, true).children.filter(c => c.name === 'row').map(({attribs}) => ({
-    sitenumber: parseInt(attribs.a),
-    zoom: parseInt(attribs.b),
-    name: attribs.c,
-    lat: parseNumber(attribs.d),
-    lng: parseNumber(attribs.e),
-    type: attribs.f,
-    disclaimer: attribs.a4,
-    stage: parseNumber(attribs.t),
-    flow: parseNumber(attribs.u),
-    wtemp: wtemp(parseNumber(attribs.a3)),
-    humidity: Math.round(parseNumber(attribs.a2)),
-    head: parseNumber(attribs.v),
-    tail: parseNumber(attribs.w),
-    rain: parseNumber(attribs.h),
-    rain30min: parseNumber(attribs.i),
-    rain1: parseNumber(attribs.j),
-    rain2: parseNumber(attribs.k),
-    rain3: parseNumber(attribs.l),
-    rain6: parseNumber(attribs.m),
-    rain12: parseNumber(attribs.n),
-    raintoday: parseNumber(attribs.o),
-    rain1day: parseNumber(attribs.p),
-    rain2day: parseNumber(attribs.q),
-    rain1wk: parseNumber(attribs.r),
-    rain2wk: parseNumber(attribs.s),
-    bankfull: Math.round(parseNumber(attribs.x)),
-    floodstage: Math.round(parseNumber(attribs.y)),
-    temp: Math.round(parseNumber(attribs.g)),
-    mintemp: Math.round(parseNumber(attribs.z)),
-    maxtemp: Math.round(parseNumber(attribs.a1)),
-  }))
+  return findOne(e => e.name === 'rows', dom, true).children.filter(c => c.name === 'row').map(({attribs}) => {
+    const result = {
+      sitenumber: parseInt(attribs.a),
+      zoom: parseInt(attribs.b),
+      name: attribs.c,
+      lat: parseFloat(attribs.d),
+      lng: parseFloat(attribs.e),
+      type: attribs.f,
+      disclaimer: attribs.a4,
+      stage: parseFloat(attribs.t),
+      flow: parseFloat(attribs.u),
+      wtemp: wtemp(parseFloat(attribs.a3)),
+      humidity: Math.round(parseFloat(attribs.a2)),
+      head: parseFloat(attribs.v),
+      tail: parseFloat(attribs.w),
+      rain: parseFloat(attribs.h),
+      rain30min: parseFloat(attribs.i),
+      rain1: parseFloat(attribs.j),
+      rain2: parseFloat(attribs.k),
+      rain3: parseFloat(attribs.l),
+      rain6: parseFloat(attribs.m),
+      rain12: parseFloat(attribs.n),
+      raintoday: parseFloat(attribs.o),
+      rain1day: parseFloat(attribs.p),
+      rain2day: parseFloat(attribs.q),
+      rain1wk: parseFloat(attribs.r),
+      rain2wk: parseFloat(attribs.s),
+      bankfull: Math.round(parseFloat(attribs.x)),
+      floodstage: Math.round(parseFloat(attribs.y)),
+      temp: Math.round(parseFloat(attribs.g)),
+      mintemp: Math.round(parseFloat(attribs.z)),
+      maxtemp: Math.round(parseFloat(attribs.a1)),
+    }
+    return omitBy(result, value => value === -998)
+  })
 }
 
 // function loadMarkerAndLabel(markerData, i) {
