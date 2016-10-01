@@ -17,7 +17,7 @@
     "domhandler": "^2.3.0",
     "domutils": "^1.5.1",
     "htmlparser2": "^3.9.1",
-    "jcore-api": "^1.2.0-beta.2",
+    "jcore-api": "^1.2.0-beta.3",
     "lodash.camelcase": "^4.3.0",
     "lodash.memoize": "^4.1.2",
     "lodash.omitby": "^4.6.0",
