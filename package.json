@@ -6,7 +6,7 @@
   "scripts": {
     "repl": "babel-node",
     "start": "babel-node src/index.js",
-    "build": "babel src/ --out-dir lib",
+    "build": "rm -rf lib && babel src/ --out-dir lib",
     "prod": "node lib/index.js"
   },
   "author": "",
