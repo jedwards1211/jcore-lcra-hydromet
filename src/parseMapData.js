@@ -1,5 +1,5 @@
 import {find, findOne, getChildren} from 'domutils'
-import {omitBy} from 'lodash'
+import omitBy from 'lodash.omitby'
 
 function wtemp(value) {
   if (value === -998) return null
