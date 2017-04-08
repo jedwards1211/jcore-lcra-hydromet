@@ -24,7 +24,7 @@
     "moment": "^2.14.1",
     "superagent": "^3.1.0",
     "superagent-charset": "^1.1.1",
-    "superagent-throttle": "^0.2.1",
+    "superagent-throttle": "^0.2.2",
     "superagent-use": "0.1.0"
   },
   "devDependencies": {
