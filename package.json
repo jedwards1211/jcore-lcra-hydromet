@@ -21,7 +21,7 @@
     "lodash.camelcase": "^4.3.0",
     "lodash.memoize": "^4.1.2",
     "lodash.omitby": "^4.6.0",
-    "moment": "^2.14.1",
+    "moment": "^2.19.4",
     "superagent": "^3.1.0",
     "superagent-charset": "^1.1.1",
     "superagent-throttle": "^0.2.1",
